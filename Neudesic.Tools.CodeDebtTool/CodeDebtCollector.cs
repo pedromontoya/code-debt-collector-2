@@ -59,11 +59,14 @@ namespace Neudesic.Tools.CodeDebt
 				//like ////// TODO:CR:A:3 blah, blah, blah. For VB '''''' TODO:CR:A:3 blah, blah, blah.
 				//This loop could be eliminated and the code will enforce the use of a single identifier followed
 				//by the debt data.
-				for (int i = pos; i < line.Length; i++)
+				if (commentIdentifier.Length > 0)
 				{
-					if (line[i] != commentIdentifier[0])
-						break;
-					pos++;
+					for (int i = pos; i < line.Length; i++)
+					{
+						if (line[i] != commentIdentifier[0])
+							break;
+						pos++;
+					}
 				}
 				///////////////////////////////////////////////////////////////////////////////////////////////////////
 				line = line.Substring(pos).TrimStart();
