@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Neudesic.Tools.CodeDebt
 {
@@ -24,14 +25,17 @@ namespace Neudesic.Tools.CodeDebt
 				FindFilesForReportingCodeDebt(RepositoryFactory.Instance, args[0], projectPaths);
 			}
 #if DEBUG
-			//WaitForKeyPress();
+			WaitForKeyPress();
 #endif
 		}
 #if DEBUG
 		private static void WaitForKeyPress()
 		{
-			Trace.WriteLine("Press any key to continue...");
-			Console.ReadLine();
+			if (Debugger.IsAttached)
+			{
+				Trace.WriteLine("Press any key to continue...");
+				Console.ReadLine();
+			}
 		}
 #endif
 		private static void FindFilesForReportingCodeDebt(ICodeDebtRepository codeRepository, string codeBase, List<string> projectPaths)
@@ -39,25 +43,44 @@ namespace Neudesic.Tools.CodeDebt
 			//If codedebt has already been reported we can just return.
 			if (codeRepository.IsCodeDebtAlreadyReported(codeBase))
 				return;
+			List<Task> parentTasks = new List<Task>();
 			foreach (string projectPath in projectPaths)
 			{
-				Trace.WriteLine(string.Format("Running CodeDebtTool on all files beginning at root {0}.", projectPath));
-				//WaitForKeyPress();
-				Dictionary<string, string> ht = new Dictionary<string, string>();
-				foreach (FileTypeInfo ft in CodeDebtConfiguration.FileTypeInfos)
-				{
-					string[] projectFiles = Directory.GetFiles(projectPath, ft.FileType, SearchOption.AllDirectories);
-					foreach (string projectFile in projectFiles)
+				parentTasks.Add(new TaskFactory().StartNew(() =>
 					{
-						if (!ht.ContainsKey(projectFile))
+						Trace.WriteLine(string.Format("Running CodeDebtTool on all files beginning at root {0}.", projectPath));
+						//WaitForKeyPress();
+						Dictionary<string, string> ht = new Dictionary<string, string>();
+						List<Task> childTasks = new List<Task>();
+						foreach (FileTypeInfo ft in CodeDebtConfiguration.FileTypeInfos)
 						{
-							ht.Add(projectFile, null);
-							ReportCodeDebtInFile(codeRepository, codeBase, ft, projectFile);
+							childTasks.Add(new TaskFactory().StartNew( () => 
+							{
+								try
+								{
+									string[] projectFiles = Directory.GetFiles(projectPath, ft.FileType, SearchOption.AllDirectories);
+									foreach (string projectFile in projectFiles)
+									{
+										if (!ht.ContainsKey(projectFile))
+										{
+											ht.Add(projectFile, null);
+											ReportCodeDebtInFile(codeRepository, codeBase, ft, projectFile);
+										}
+									}
+								}
+								catch (Exception exc)
+								{
+									Exception baseExc = exc.GetBaseException();
+									Trace.WriteLine(string.Format("Exception={0}\r\nTargetSite={1}\r\n{2}",
+										baseExc.Message, baseExc.TargetSite.Name, baseExc.StackTrace));
+								}
+							}));
 						}
-					}
-				}
-				Trace.WriteLine("");
+						Task.WaitAll(childTasks.ToArray());
+						Trace.WriteLine(string.Format("Completed running CodeDebtTool on all files beginning at root {0}.\r\n", projectPath));
+					}));
 			}
+			Task.WaitAll(parentTasks.ToArray());
 		}
 
 		private static void ReportCodeDebtInFile(ICodeDebtRepository codeRepository, string codeBase, FileTypeInfo ft, string projectFile)

@@ -170,7 +170,7 @@ namespace Neudesic.Tools.CodeDebt
 		private static void ValidateDebtInfo(DebtInfo debtInfo)
 		{
 			//If no criticality not found, default to type "A"
-			if (debtInfo.Criticality == null || debtInfo.Criticality == 0)
+			if (debtInfo.Criticality == 0)
 				debtInfo.Criticality = (char)Criticality.Critical;
 			if (debtInfo.Initials == null || debtInfo.Initials.Length > 5)
 				debtInfo.Initials = string.Empty;
