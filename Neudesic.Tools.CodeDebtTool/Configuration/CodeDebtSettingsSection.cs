@@ -16,6 +16,15 @@ namespace Neudesic.Tools.CodeDebt.Configuration
 				return (FileTypeSettingsCollection)base["fileTypes"];
 			}
 		}
+        [ConfigurationProperty("ignorePaths", IsDefaultCollection = false)]
+        [ConfigurationCollection(typeof(IgnorePathSettingsCollection))]
+        public IgnorePathSettingsCollection IgnorePathsConfiguration
+        {
+            get
+            {
+                return (IgnorePathSettingsCollection)base["ignorePaths"];
+            }
+        }
 		[ConfigurationProperty("debtKeys")]
 		public string DebtKeys
 		{

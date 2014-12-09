@@ -38,6 +38,19 @@ namespace Neudesic.Tools.CodeDebt
 			}
 		}
 
+        public static List<string> IgnorePaths
+        {
+            get
+            {
+                List<string> ignorePaths = new List<string>();
+                foreach (IgnorePathSettingElement ignorePath in ms_configurationSettings.IgnorePathsConfiguration)
+                {
+                    ignorePaths.Add(ignorePath.IgnorePath);
+                }
+                return ignorePaths;
+            }
+        }
+
 		public static List<string> DebtIdentifiers
 		{
 			get

@@ -57,7 +57,9 @@
     <Compile Include="CodeDebtCollector.cs" />
     <Compile Include="Configuration\CodeDebtConfiguration.cs" />
     <Compile Include="Configuration\CodeDebtSettingsSection.cs" />
+    <Compile Include="Configuration\IngorePathSettingElement.cs" />
     <Compile Include="Configuration\FileTypeSettingElement.cs" />
+    <Compile Include="Configuration\IgnorePatheSettingsCollection.cs" />
     <Compile Include="Configuration\FileTypeSettingsCollection.cs" />
     <Compile Include="Configuration\RepositoriesCollection.cs" />
     <Compile Include="Configuration\RepositoriesSection.cs" />

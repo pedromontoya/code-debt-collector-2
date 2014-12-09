@@ -24,6 +24,7 @@
         <TargetServerURL>http://localhost/ReportServer</TargetServerURL>
         <TargetFolder>Code Debt</TargetFolder>
         <TargetDataSourceFolder>Code Debt</TargetDataSourceFolder>
+        <StartItem>Application Code Debt.rdl</StartItem>
       </Options>
     </Configuration>
     <Configuration>

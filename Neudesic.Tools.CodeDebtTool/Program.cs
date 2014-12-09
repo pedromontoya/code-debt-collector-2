@@ -3,12 +3,20 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Neudesic.Tools.CodeDebt
 {
 	class Program
 	{
+        private static List<string> _ignorePaths;
+
+        static Program()
+        {
+            _ignorePaths = CodeDebtConfiguration.IgnorePaths;
+        }
+
 		static void Main(string[] args)
 		{
 			if (args.Length < 2)
@@ -39,7 +47,7 @@ namespace Neudesic.Tools.CodeDebt
 		}
 #endif
 		private static void FindFilesForReportingCodeDebt(ICodeDebtRepository codeRepository, string codeBase, List<string> projectPaths)
-		{
+        {
 			//If codedebt has already been reported we can just return.
 			if (codeRepository.IsCodeDebtAlreadyReported(codeBase))
 				return;
@@ -61,7 +69,17 @@ namespace Neudesic.Tools.CodeDebt
 									string[] projectFiles = Directory.GetFiles(projectPath, ft.FileType, SearchOption.AllDirectories);
 									foreach (string projectFile in projectFiles)
 									{
-										if (!ht.ContainsKey(projectFile))
+                                        var isIgnoreFile = false;
+                                        foreach (var ignorePath in _ignorePaths)
+                                        {
+                                            if (projectFile.Contains(ignorePath))
+                                            {
+                                                isIgnoreFile = true;
+                                                break;
+                                            }
+                                        }
+
+										if (!isIgnoreFile && !ht.ContainsKey(projectFile))
 										{
 											ht.Add(projectFile, null);
 											ReportCodeDebtInFile(codeRepository, codeBase, ft, projectFile);
